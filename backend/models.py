@@ -1,18 +1,19 @@
 from sqlmodel import SQLModel, Field, Relationship
 from pydantic import EmailStr
 from datetime import datetime
+from typing import Optional, List
 
 
 '''
 Many-to-Many
 '''
 class CarritoLibroLink(SQLModel, table=True):
-    carrito_id: int = Field(foreign_key="carrito.id", primary_key=True)
-    libro_id: int = Field(foreign_key="libro.id", primary_key=True)
+    carrito_id: Optional[int] = Field(foreign_key="carrito.id", primary_key=True)
+    libro_id: Optional[int] = Field(foreign_key="libro.id", primary_key=True)
 
 class VentaLibroLink(SQLModel, table=True):
-    venta_id: int = Field(foreign_key="venta.id", primary_key=True)
-    Libro_id: int = Field(foreign_key="libro.id", primary_key=True)
+    venta_id: Optional[int] = Field(foreign_key="venta.id", primary_key=True)
+    libro_id: Optional[int] = Field(foreign_key="libro.id", primary_key=True)
 
 
 '''
@@ -36,15 +37,42 @@ class Usuario(SQLModel, table=True):
 '''
 Libro
 '''
-class Libro(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
+class LibroBase(SQLModel):
     titulo: str = Field(max_length=100)
     autor: str = Field(max_length=100)
     editorial: str = Field(max_length=100)
     precio: float = Field(gt=0)
     cantidad_disponible: int = Field(ge=0)
     descripcion: str = Field(max_length=400)
-    imagen_url: str = Field()
+    imagen_url: str
+    
+class Libro(LibroBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    
+    carritos: List["Carrito"] = Relationship(
+        back_populates="libros",
+        link_model=CarritoLibroLink
+    )
+    
+    ventas: List["Venta"] = Relationship(
+        back_populates="libros",
+        link_model=VentaLibroLink
+    )
+
+class LibroCreate(LibroBase):
+    pass 
+
+class LibroRead(LibroBase):
+    id: int
+
+class LibroUpdate(SQLModel):
+    titulo: Optional[str] = Field(default=None, max_length=100)
+    autor: Optional[str] = Field(default=None, max_length=100)
+    editorial: Optional[str] = Field(default=None, max_length=100)
+    precio: Optional[float] = Field(default=None, gt=0)
+    cantidad_disponible: Optional[int] = Field(default=None, ge=0)
+    descripcion: Optional[str] = Field(default=None, max_length=400)
+    imagen_url: Optional[str] = Field(default=None)
 
 '''
 Carrito
@@ -75,7 +103,6 @@ class Venta(SQLModel, table=True):
     usuario: Usuario = Relationship(back_populates="ventas")
     
     libros: list[Libro] = Relationship(
-        back_populates="Ventas",
+        back_populates="ventas",
         link_model=VentaLibroLink
     )
-    
