@@ -1,0 +1,20 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { booksData } from "../../data/books";
+import { ViewTransitions } from "astro:transitions";
+import BookDetailsPage from "../../components/BookDetailsPage";
+
+export function getStaticPaths() {
+    return booksData.map((book) => ({
+        params: { id: book.id.toString() },
+        props: { book },
+    }));
+}
+
+const { book } = Astro.props;
+---
+
+<Layout title={`${book.title} - Mercado Libro`}>
+    <ViewTransitions />
+    <BookDetailsPage client:only="react" book={book} />
+</Layout>
