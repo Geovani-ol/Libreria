@@ -88,6 +88,22 @@ class Carrito(SQLModel, table=True):
         link_model=CarritoLibroLink
     )
 
+class LibroInCarrito(SQLModel):
+    id: int
+    titulo: str
+    precio: float
+
+class CarritoRead(SQLModel):
+    id: int
+    usuario_id: int
+    libros: List[LibroInCarrito] = []
+
+class CarritoCreate(SQLModel):
+    usuario_id: int
+
+class CarritoUpdate(SQLModel):
+    libros_ids: Optional[List[int]] = Field(default=None)
+
 
 '''
 Venta

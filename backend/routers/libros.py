@@ -5,7 +5,9 @@ from db import get_session
 from models import Libro, LibroCreate, LibroRead, LibroUpdate
 
 
-
+'''
+ROUTER
+'''
 router = APIRouter(
     prefix="/libros",
     tags=["Libros"]
@@ -64,3 +66,13 @@ def update_libro(*, session: Session = Depends(get_session), libro_id: int, libr
 '''
 ELIMINAR PRO ID
 '''
+@router.delete("/{libro_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_libro(*, session: Session = Depends(get_session), libro_id: int):
+    libro = session.get(Libro, libro_id)
+    
+    if not libro:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Libro no encontrado")
+    
+    session.delete(libro)
+    session.commit()
+    return {"ok": True}
