@@ -8,9 +8,9 @@ export default function Header({ children }) {
                 {/* Slot para el ícono del carrito */}
                 {children}
 
-                <button className="px-5 py-2 bg-accent text-white hover:bg-blue-950 transition-colors rounded-md">
+                <a href="/login" className="px-5 py-2 bg-accent text-white hover:bg-blue-950 transition-colors rounded-md">
                     Iniciar Sesión
-                </button>
+                </a>
             </div>
         </header>
     );

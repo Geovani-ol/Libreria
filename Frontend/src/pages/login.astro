@@ -1,0 +1,10 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { ClientRouter } from "astro:transitions";
+import LoginForm from "../components/LoginForm";
+---
+
+<Layout title="Iniciar Sesión - Mercado Libro">
+    <ClientRouter />
+    <LoginForm client:only="react" />
+</Layout>

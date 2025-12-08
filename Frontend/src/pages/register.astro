@@ -1,0 +1,10 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { ClientRouter } from "astro:transitions";
+import RegisterForm from "../components/RegisterForm";
+---
+
+<Layout title="Crear Cuenta - Mercado Libro">
+    <ClientRouter />
+    <RegisterForm client:only="react" />
+</Layout>
