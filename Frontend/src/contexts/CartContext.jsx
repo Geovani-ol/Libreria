@@ -4,6 +4,7 @@ const CartContext = createContext();
 
 export function CartProvider({ children }) {
     const [cartItems, setCartItems] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     // Cargar carrito desde localStorage al iniciar
     useEffect(() => {
@@ -15,12 +16,15 @@ export function CartProvider({ children }) {
                 console.error("Error loading cart:", error);
             }
         }
+        setIsLoading(false);
     }, []);
 
     // Guardar carrito en localStorage cuando cambie
     useEffect(() => {
-        localStorage.setItem("cart", JSON.stringify(cartItems));
-    }, [cartItems]);
+        if (!isLoading) {
+            localStorage.setItem("cart", JSON.stringify(cartItems));
+        }
+    }, [cartItems, isLoading]);
 
     // Agregar item al carrito
     const addToCart = (book, quantity = 1) => {
@@ -76,10 +80,10 @@ export function CartProvider({ children }) {
         return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
     };
 
-    // Calcular envío (gratis si es mayor a $50, sino $5)
+    // Calcular envío (gratis si es mayor a $200, sino $5)
     const getShipping = () => {
         const subtotal = getSubtotal();
-        return subtotal > 50 ? 0 : 5;
+        return subtotal >= 200 ? 0 : 120;
     };
 
     // Calcular total
@@ -89,6 +93,7 @@ export function CartProvider({ children }) {
 
     const value = {
         cartItems,
+        isLoading,
         addToCart,
         removeFromCart,
         updateQuantity,

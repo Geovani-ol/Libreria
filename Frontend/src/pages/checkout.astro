@@ -1,0 +1,10 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { ViewTransitions } from "astro:transitions";
+import CheckoutPageWrapper from "../components/CheckoutPageWrapper";
+---
+
+<Layout title="Proceso de Pago - Mercado Libro">
+    <ViewTransitions />
+    <CheckoutPageWrapper client:only="react" />
+</Layout>

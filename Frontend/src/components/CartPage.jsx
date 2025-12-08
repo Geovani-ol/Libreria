@@ -40,33 +40,47 @@ export default function CartPage() {
                 <div className="bg-white rounded-lg shadow-lg p-6 sticky top-8">
                     <h2 className="text-xl font-bold mb-4">Resumen del Pedido</h2>
 
-                    <div className="space-y-3 mb-4">
-                        <div className="flex justify-between text-gray-700">
-                            <span>Subtotal</span>
-                            <span>${getSubtotal().toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between text-gray-700">
-                            <span>Envío</span>
-                            <span>{getShipping() === 0 ? 'Gratis' : `$${getShipping().toFixed(2)}`}</span>
-                        </div>
-                        {getShipping() === 0 && (
-                            <p className="text-sm text-green-600">¡Envío gratis en compras mayores a $50!</p>
-                        )}
+                    <div className="flex justify-between mb-2">
+                        <span className="text-gray-600">Subtotal</span>
+                        <span className="font-semibold">${getSubtotal().toFixed(2)}</span>
                     </div>
 
-                    <hr className="border-gray-200 my-4" />
+                    <div className="flex justify-between mb-2">
+                        <span className="text-gray-600">Envío</span>
+                        <span className="font-semibold">
+                            {getShipping() === 0 ? (
+                                <span className="text-green-600">¡Gratis!</span>
+                            ) : (
+                                `$${getShipping().toFixed(2)}`
+                            )}
+                        </span>
+                    </div>
+
+                    {getSubtotal() < 200 && (
+                        <p className="text-xs text-gray-500 mb-3">
+                            Agrega ${(200 - getSubtotal()).toFixed(2)} más para envío gratis
+                        </p>
+                    )}
+
+                    <div className="flex justify-between mb-4 pb-4 border-b border-gray-200">
+                        <span className="text-gray-600 text-sm">Impuestos (8%)</span>
+                        <span className="text-sm text-gray-600">Se calcularán al finalizar</span>
+                    </div>
 
                     <div className="flex justify-between text-xl font-bold mb-6">
                         <span>Total</span>
                         <span>${getTotal().toFixed(2)}</span>
                     </div>
 
-                    <button className="w-full bg-accent text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-950 transition-colors mb-3 flex items-center justify-center gap-2">
+                    <a
+                        href="/checkout"
+                        className="w-full bg-accent text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-950 transition-colors mb-3 flex items-center justify-center gap-2"
+                    >
                         Proceder al Pago
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
-                    </button>
+                    </a>
 
                     <a
                         href="/"

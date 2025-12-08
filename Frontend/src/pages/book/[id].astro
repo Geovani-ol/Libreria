@@ -1,7 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import { booksData } from "../../data/books";
-import { ViewTransitions } from "astro:transitions";
+import { ClientRouter } from "astro:transitions";
 import BookDetailsPage from "../../components/BookDetailsPage";
 
 export function getStaticPaths() {
@@ -15,6 +15,6 @@ const { book } = Astro.props;
 ---
 
 <Layout title={`${book.title} - Mercado Libro`}>
-    <ViewTransitions />
+    <ClientRouter />
     <BookDetailsPage client:only="react" book={book} />
 </Layout>
