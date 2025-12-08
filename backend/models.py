@@ -19,6 +19,28 @@ class VentaLibroLink(SQLModel, table=True):
 '''
 Usuario
 '''
+class UsuarioRegister(SQLModel):
+    correo: EmailStr = Field(max_length=50)
+    password: str = Field(max_length=20)
+    nombre: str = Field(max_length=100)
+    direccion: str = Field(max_length=200)
+    telefono: str = Field(max_length=15)
+    rfc: str = Field(max_length=20)
+
+# Lectura 
+class UsuarioRead(SQLModel):
+    id: int
+    correo: EmailStr
+    nombre: str
+    fecha_registro: datetime
+    es_admin: bool
+
+# Login
+class UsuarioLogin(SQLModel):
+    correo: EmailStr
+    password: str
+
+# Modelo completo
 class Usuario(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     correo: EmailStr = Field(max_length=50)

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from db import create_db_and_tables
-from routers import libros, carrito
+from routers import libros, carrito, autenticacion
 
 '''
 INICIAR DATABASE
@@ -26,6 +26,7 @@ INCLUIR ROUTERS
 '''
 app.include_router(libros.router)
 app.include_router(carrito.router)
+app.include_router(autenticacion.router)
 
 @app.get("/", tags=["Root"])
 def read_root():
