@@ -68,5 +68,6 @@ def login_usuario(*, session: Session = Depends(get_session), login_data: Usuari
 
     return {
         "message": f"Login exitodoso para el usuario {usuario.nombre}",
-        "user_id": usuario.id
+        "user_id": usuario.id,
+        "is_admin": usuario.es_admin
     }
