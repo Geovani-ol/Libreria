@@ -1,16 +1,169 @@
+import { useState, useEffect, useRef } from "react";
 import Logo from "./Logo";
+import CartIcon from "./CartIcon";
 
-export default function Header({ children }) {
+export default function Header() {
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    // Check authentication status on mount and when localStorage changes
+    useEffect(() => {
+        const checkAuthStatus = () => {
+            const userId = localStorage.getItem("user_id");
+            setIsLoggedIn(!!userId);
+        };
+
+        checkAuthStatus();
+
+        // Listen for storage changes (for multi-tab sync)
+        window.addEventListener("storage", checkAuthStatus);
+
+        return () => {
+            window.removeEventListener("storage", checkAuthStatus);
+        };
+    }, []);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        if (isDropdownOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isDropdownOpen]);
+
+    const handleLogout = () => {
+        // Remove all auth-related data from localStorage
+        localStorage.removeItem("user_id");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("user_email");
+
+        // Redirect to home page
+        window.location.href = "/";
+    };
+
+    const toggleDropdown = () => {
+        setIsDropdownOpen(!isDropdownOpen);
+    };
+
     return (
-        <header className="flex justify-between items-center px-5 md:px-25 py-4 bg-primary border-b border-gray-200">
+        <header className="flex justify-between items-center px-5 md:px-25 py-4 bg-primary border-b border-gray-200 sticky top-0 z-50 shadow-sm">
             <Logo />
-            <div className="flex items-center gap-4">
-                {/* Slot para el ícono del carrito */}
-                {children}
 
-                <a href="/login" className="px-5 py-2 bg-accent text-white hover:bg-blue-950 transition-colors rounded-md">
-                    Iniciar Sesión
-                </a>
+            <div className="flex items-center gap-4">
+                {isLoggedIn ? (
+                    <>
+                        {/* Cart Icon - Only visible when logged in */}
+                        <CartIcon />
+
+                        {/* User Menu - Only visible when logged in */}
+                        <div className="relative" ref={dropdownRef}>
+                            <button
+                                onClick={toggleDropdown}
+                                className="p-2 bg-accent text-white hover:bg-blue-950 transition-colors rounded-full focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+                                aria-label="Menú de usuario"
+                            >
+                                <svg
+                                    className="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                    />
+                                </svg>
+                            </button>
+
+                            {/* Dropdown Menu */}
+                            {isDropdownOpen && (
+                                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
+                                    <a
+                                        href="/dashboard"
+                                        className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors"
+                                    >
+                                        <svg
+                                            className="w-5 h-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                                            />
+                                        </svg>
+                                        <span>Panel de Usuario</span>
+                                    </a>
+
+                                    <a
+                                        href="/orders"
+                                        className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors"
+                                    >
+                                        <svg
+                                            className="w-5 h-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                                            />
+                                        </svg>
+                                        <span>Pedidos</span>
+                                    </a>
+
+                                    <hr className="my-2 border-gray-200" />
+
+                                    <button
+                                        onClick={handleLogout}
+                                        className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors w-full text-left"
+                                    >
+                                        <svg
+                                            className="w-5 h-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                                            />
+                                        </svg>
+                                        <span>Cerrar Sesión</span>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </>
+                ) : (
+                    /* Login Button - Only visible when NOT logged in */
+                    <a
+                        href="/login"
+                        className="px-5 py-2 bg-accent text-white hover:bg-blue-950 transition-colors rounded-md font-medium"
+                    >
+                        Iniciar Sesión
+                    </a>
+                )}
             </div>
         </header>
     );

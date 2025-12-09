@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from db import get_session
 from models import Usuario, UsuarioRegister, UsuarioLogin, UsuarioRead
-from security import hash_password, verify_password, verify_password
+from security import hash_password, verify_password
 
 router = APIRouter(
     prefix="/auth",
@@ -62,9 +62,9 @@ def login_usuario(*, session: Session = Depends(get_session), login_data: Usuari
     
     if not verify_password(login_data.password, usuario.password):
         raise HTTPException(
-            status_coe = status.HTTP_401_UNAUTHORIZED,
+            status_code = status.HTTP_401_UNAUTHORIZED,
             detail="Correo o contraseña incorrectos"
-    )
+        )
 
     return {
         "message": f"Login exitodoso para el usuario {usuario.nombre}",

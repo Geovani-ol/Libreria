@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { registerUser } from '../utils/api.js';
 
 export default function RegisterForm() {
     const [formData, setFormData] = useState({
@@ -42,22 +43,19 @@ export default function RegisterForm() {
         setIsLoading(true);
 
         try {
-            // TODO: Replace with actual API endpoint
-            const response = await fetch('/api/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
+            // Llamar a la API de registro usando la función del módulo de utilidades
+            const data = await registerUser({
+                correo: formData.email,
+                password: formData.password,
+                nombre: formData.fullName,
+                direccion: formData.address,
+                telefono: formData.phone,
+                rfc: formData.rfc || ''  // Si está vacío, enviar string vacío
             });
 
-            if (!response.ok) {
-                throw new Error('Error al crear la cuenta');
-            }
+            console.log('Usuario registrado:', data);
 
-            const data = await response.json();
-
-            // Redirect to login or home page
+            // Redirigir a la página de login con mensaje de éxito
             window.location.href = '/login?registered=true';
         } catch (err) {
             setError(err.message || 'Error al crear la cuenta. Por favor, intenta de nuevo.');

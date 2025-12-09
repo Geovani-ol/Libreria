@@ -44,7 +44,7 @@ class UsuarioLogin(SQLModel):
 class Usuario(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     correo: EmailStr = Field(max_length=50)
-    password: str = Field(max_length=20)
+    password: str = Field(max_length=255)  # Hash de bcrypt necesita ~60 caracteres
     nombre: str = Field(max_length=100)
     direccion: str = Field(max_length=200)
     telefono: str = Field(max_length=15)

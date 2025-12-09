@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { loginUser } from '../utils/api.js';
 
 export default function LoginForm() {
     const [email, setEmail] = useState('');
@@ -13,29 +14,19 @@ export default function LoginForm() {
         setIsLoading(true);
 
         try {
-            // TODO: Replace with actual API endpoint
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
+            // Llamar a la API de login usando la función del módulo de utilidades
+            const data = await loginUser({
+                correo: email,
+                password: password
             });
 
-            if (!response.ok) {
-                throw new Error('Credenciales inválidas');
+            // Guardar user_id en localStorage para uso futuro
+            if (data.user_id) {
+                localStorage.setItem('user_id', data.user_id);
             }
 
-            const data = await response.json();
-
-            // Distinguish between user types and redirect accordingly
-            if (data.role === 'admin' || data.isAdmin) {
-                // Redirect to admin panel
-                window.location.href = '/admin';
-            } else {
-                // Redirect to user dashboard or home
-                window.location.href = '/';
-            }
+            // Redirigir a la página principal
+            window.location.href = '/';
         } catch (err) {
             setError(err.message || 'Error al iniciar sesión. Por favor, intenta de nuevo.');
         } finally {

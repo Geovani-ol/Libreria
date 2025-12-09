@@ -1,7 +1,7 @@
 from passlib.context import CryptContext
 
-# Esquema de hash
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Esquema de hash - usando pbkdf2_sha256 para mejor compatibilidad
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 '''
 Hashear contraseña
