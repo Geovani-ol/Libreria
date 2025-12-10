@@ -56,6 +56,30 @@ class Usuario(SQLModel, table=True):
     ventas: list["Venta"] = Relationship(back_populates="usuario")
 
 
+
+
+
+'''
+Categoria
+'''
+class CategoriaBase(SQLModel):
+    nombre: str = Field(max_length=100, unique=True, index=True)
+
+class Categoria(CategoriaBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    
+    libros: List["Libro"] = Relationship(back_populates="categoria")
+
+class CategoriaCreate(CategoriaBase):
+    pass
+
+class CategoriaRead(CategoriaBase):
+    id: int
+
+class CategoriaUpdate(SQLModel):
+    nombre: Optional[str] = Field(default=None, max_length=100)
+
+
 '''
 Libro
 '''
@@ -66,10 +90,16 @@ class LibroBase(SQLModel):
     precio: float = Field(gt=0)
     cantidad_disponible: int = Field(ge=0)
     descripcion: str = Field(max_length=400)
+    paginas: int = Field(gt=0)
+    categoria_id: int = Field(foreign_key="categoria.id")
+    idioma: str = Field(max_length=100)
+    fecha_publicacion: int = Field(le=datetime.now().year)
     imagen_url: str
     
 class Libro(LibroBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    
+    categoria: Optional[Categoria] = Relationship(back_populates="libros")
     
     carritos: List["Carrito"] = Relationship(
         back_populates="libros",
@@ -86,6 +116,7 @@ class LibroCreate(LibroBase):
 
 class LibroRead(LibroBase):
     id: int
+    categoria: Optional[CategoriaRead] = None
 
 class LibroUpdate(SQLModel):
     titulo: Optional[str] = Field(default=None, max_length=100)
@@ -94,7 +125,12 @@ class LibroUpdate(SQLModel):
     precio: Optional[float] = Field(default=None, gt=0)
     cantidad_disponible: Optional[int] = Field(default=None, ge=0)
     descripcion: Optional[str] = Field(default=None, max_length=400)
+    paginas: Optional[int] = Field(default=None, gt=0)
+    categoria_id: Optional[int] = Field(default=None)
+    idioma: Optional[str] = Field(default=None, max_length=100)
+    fecha_publicacion: Optional[int] = Field(default=None, le=datetime.now().year)
     imagen_url: Optional[str] = Field(default=None)
+
 
 '''
 Carrito

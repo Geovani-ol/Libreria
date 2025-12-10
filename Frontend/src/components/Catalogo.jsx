@@ -19,15 +19,15 @@ export default function Catalogo() {
     const [sortBy, setSortBy] = useState("relevance");
     const [searchQuery, setSearchQuery] = useState("");
 
-    // Fetch books from API on mount
+    // Fetch books from API when category changes
     useEffect(() => {
         fetchBooks();
-    }, []);
+    }, [selectedCategory]);
 
     const fetchBooks = async () => {
         try {
             setIsLoading(true);
-            const data = await getAllBooks();
+            const data = await getAllBooks(selectedCategory);
             setBooks(data);
             setError("");
         } catch (err) {
@@ -58,14 +58,13 @@ export default function Catalogo() {
         window.history.pushState({}, "", url);
     };
 
-    // Filtrar libros por categoría y búsqueda
+    // Filtrar libros solo por búsqueda (la categoría se filtra en el backend)
     const filteredBooks = books.filter(book => {
-        const matchesCategory = selectedCategory ? book.category === selectedCategory : true;
         const matchesSearch = searchQuery
             ? book.titulo.toLowerCase().includes(searchQuery.toLowerCase()) ||
             book.autor.toLowerCase().includes(searchQuery.toLowerCase())
             : true;
-        return matchesCategory && matchesSearch;
+        return matchesSearch;
     });
 
     // Ordenar libros

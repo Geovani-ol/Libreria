@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
-from typing import List
+from typing import List, Optional
 from db import get_session
 from models import Libro, LibroCreate, LibroRead, LibroUpdate
 
@@ -29,8 +29,23 @@ def create_libro(*, session: Session = Depends(get_session), libro: LibroCreate)
 LEER TODOS
 '''
 @router.get("/", response_model=List[LibroRead])
-def read_libros(*, session: Session = Depends(get_session), offset: int = 0, limit: int = 100):
-    libros = session.exec(select(Libro).offset(offset).limit(limit)).all()
+def read_libros(
+    *, 
+    session: Session = Depends(get_session), 
+    offset: int = 0, 
+    limit: int = 100,
+    categoria_id: Optional[int] = None
+):
+    query = select(Libro)
+    
+    # Aplicar filtro de categoría si se proporciona
+    if categoria_id:
+        query = query.where(Libro.categoria_id == categoria_id)
+    
+    # Aplicar offset y limit
+    query = query.offset(offset).limit(limit)
+    
+    libros = session.exec(query).all()
     return libros
 
 

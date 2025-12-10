@@ -84,11 +84,18 @@ export async function loginUser(credentials) {
 
 /**
  * Obtiene todos los libros del sistema
+ * @param {number} categoria_id - ID de categoría opcional para filtrar libros
  * @returns {Promise<Array>} Lista de todos los libros
  */
-export async function getAllBooks() {
+export async function getAllBooks(categoria_id = null) {
     try {
-        const response = await fetch(`${API_BASE_URL}/libros`, {
+        // Construir URL con parámetros opcionales
+        let url = `${API_BASE_URL}/libros`;
+        if (categoria_id) {
+            url += `?categoria_id=${encodeURIComponent(categoria_id)}`;
+        }
+
+        const response = await fetch(url, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -190,6 +197,122 @@ export async function deleteBook(bookId) {
         return;
     } catch (error) {
         console.error('Error en deleteBook:', error);
+        throw error;
+    }
+}
+
+/**
+ * Category Management API Functions
+ */
+
+/**
+ * Obtiene todas las categorías disponibles
+ * @returns {Promise<Array>} Lista de todas las categorías
+ */
+export async function getAllCategories() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/categorias`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Error al obtener las categorías');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error en getAllCategories:', error);
+        throw error;
+    }
+}
+
+/**
+ * Crea una nueva categoría
+ * @param {Object} categoriaData - Datos de la categoría a crear
+ * @returns {Promise<Object>} Categoría creada
+ */
+export async function createCategoria(categoriaData) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/categorias/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(categoriaData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Error al crear la categoría');
+        }
+
+        const data = await response.json();
+        console.log('Categoría creada exitosamente:', data);
+        return data;
+    } catch (error) {
+        console.error('Error en createCategoria:', error);
+        throw error;
+    }
+}
+
+/**
+ * Actualiza una categoría existente
+ * @param {number} categoriaId - ID de la categoría a actualizar
+ * @param {Object} categoriaData - Datos actualizados de la categoría
+ * @returns {Promise<Object>} Categoría actualizada
+ */
+export async function updateCategoria(categoriaId, categoriaData) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/categorias/${categoriaId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(categoriaData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Error al actualizar la categoría');
+        }
+
+        const data = await response.json();
+        console.log('Categoría actualizada exitosamente:', data);
+        return data;
+    } catch (error) {
+        console.error('Error en updateCategoria:', error);
+        throw error;
+    }
+}
+
+/**
+ * Elimina una categoría
+ * @param {number} categoriaId - ID de la categoría a eliminar
+ * @returns {Promise<void>}
+ */
+export async function deleteCategoria(categoriaId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/categorias/${categoriaId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Error al eliminar la categoría');
+        }
+
+        console.log('Categoría eliminada exitosamente');
+        return;
+    } catch (error) {
+        console.error('Error en deleteCategoria:', error);
         throw error;
     }
 }

@@ -1,6 +1,6 @@
 from sqlmodel import create_engine, Session, SQLModel, select
 from typing import Generator
-from models import Libro, Usuario
+from models import Libro, Usuario, Categoria
 
 from security import hash_password
 
@@ -17,6 +17,25 @@ ADMIN_NOMBRE = ""
 def create_db_and_tables():
 
     SQLModel.metadata.create_all(engine)
+    
+    # Poblar categorías iniciales
+    seed_initial_categories()
+
+def seed_initial_categories():
+    """Populate initial categories if they don't exist"""
+    with Session(engine) as session:
+        categories = ["Fantasía", "Ciencia ficción", "Misterio", "Novela Histórica", "Ficción", "Romance", "Terror", "Aventura"]
+        
+        for cat_name in categories:
+            existing = session.exec(
+                select(Categoria).where(Categoria.nombre == cat_name)
+            ).first()
+            
+            if not existing:
+                session.add(Categoria(nombre=cat_name))
+                print(f"Categoría '{cat_name}' agregada.")
+        
+        session.commit()
 
 '''
     with Session(engine) as session:
