@@ -20,13 +20,20 @@ export default function LoginForm() {
                 password: password
             });
 
-            // Guardar user_id en localStorage para uso futuro
+            // Guardar user_id e is_admin en localStorage para uso futuro
             if (data.user_id) {
                 localStorage.setItem('user_id', data.user_id);
             }
+            if (data.is_admin !== undefined) {
+                localStorage.setItem('is_admin', data.is_admin.toString());
+            }
 
-            // Redirigir a la página principal
-            window.location.href = '/';
+            // Redirigir según el rol del usuario
+            if (data.is_admin) {
+                window.location.href = '/dashboard';
+            } else {
+                window.location.href = '/';
+            }
         } catch (err) {
             setError(err.message || 'Error al iniciar sesión. Por favor, intenta de nuevo.');
         } finally {

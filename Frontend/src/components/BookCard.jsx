@@ -6,8 +6,8 @@ export default function BookCard({ book }) {
                     {/* Imagen del libro */}
                     <div className="relative aspect-3/4 overflow-hidden bg-gray-100">
                         <img
-                            src={book.image}
-                            alt={`Portada de ${book.title}`}
+                            src={book.imagen_url}
+                            alt={`Portada de ${book.titulo}`}
                             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                             data-astro-transition-name={`book-image-${book.id}`}
                         />
@@ -21,17 +21,17 @@ export default function BookCard({ book }) {
                     {/* Información del libro */}
                     <div className="p-4 flex flex-col grow">
                         <h3 className="font-semibold text-gray-900 text-base mb-1 line-clamp-2 group-hover:text-accent transition-colors">
-                            {book.title}
+                            {book.titulo}
                         </h3>
                         <p className="text-sm text-gray-600 mb-3 line-clamp-1">
-                            {book.author}
+                            {book.autor}
                         </p>
 
                         {/* Precio */}
                         <div className="mt-auto flex items-center justify-between">
                             <div className="flex items-baseline gap-2">
                                 <span className="text-lg font-bold text-gray-900">
-                                    ${book.price.toFixed(2)}
+                                    ${book.precio.toFixed(2)}
                                 </span>
                                 {book.originalPrice && (
                                     <span className="text-sm text-gray-500 line-through">

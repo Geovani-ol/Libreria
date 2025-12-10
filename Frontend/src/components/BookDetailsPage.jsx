@@ -6,9 +6,7 @@ import { CartProvider } from "../contexts/CartContext";
 export default function BookDetailsPage({ book }) {
     return (
         <CartProvider>
-            <Header>
-                <CartIcon />
-            </Header>
+            <Header />
 
             <main className="bg-gray-50 min-h-screen">
                 <div className="max-w-7xl mx-auto px-6 py-8">

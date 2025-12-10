@@ -64,6 +64,31 @@ def update_libro(*, session: Session = Depends(get_session), libro_id: int, libr
 
 
 '''
+ACTUALIZAR COMPLETO POR ID (PUT)
+'''
+@router.put("/{libro_id}", response_model=LibroRead)
+def update_libro_completo(*, 
+                          session: Session = Depends(get_session), 
+                          libro_id: int, 
+                          libro_nuevo: LibroCreate):
+    
+    db_libro = session.get(Libro, libro_id)
+    
+    if not db_libro:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Libro no encontrado")
+    
+    nuevos_datos = libro_nuevo.model_dump()
+    
+    for key, value in nuevos_datos.items():
+        setattr(db_libro, key, value)
+ 
+    session.add(db_libro)
+    session.commit()
+    session.refresh(db_libro)
+    
+    return db_libro
+
+'''
 ELIMINAR PRO ID
 '''
 @router.delete("/{libro_id}", status_code=status.HTTP_204_NO_CONTENT)

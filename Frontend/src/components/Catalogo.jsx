@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import BookCard from "./BookCard";
-import { booksData } from "../data/books";
+import { getAllBooks } from "../utils/api";
 
 const categorias = ["Fantasía", "Ciencia ficción", "Misterio", "Novela Histórica", "Ficción"];
 
@@ -12,9 +12,30 @@ const sortOptions = [
 ];
 
 export default function Catalogo() {
+    const [books, setBooks] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState("");
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [sortBy, setSortBy] = useState("relevance");
     const [searchQuery, setSearchQuery] = useState("");
+
+    // Fetch books from API on mount
+    useEffect(() => {
+        fetchBooks();
+    }, []);
+
+    const fetchBooks = async () => {
+        try {
+            setIsLoading(true);
+            const data = await getAllBooks();
+            setBooks(data);
+            setError("");
+        } catch (err) {
+            setError(err.message || "Error al cargar los libros");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // Leer categoría de URL al cargar
     useEffect(() => {
@@ -38,11 +59,11 @@ export default function Catalogo() {
     };
 
     // Filtrar libros por categoría y búsqueda
-    const filteredBooks = booksData.filter(book => {
+    const filteredBooks = books.filter(book => {
         const matchesCategory = selectedCategory ? book.category === selectedCategory : true;
         const matchesSearch = searchQuery
-            ? book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            book.author.toLowerCase().includes(searchQuery.toLowerCase())
+            ? book.titulo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            book.autor.toLowerCase().includes(searchQuery.toLowerCase())
             : true;
         return matchesCategory && matchesSearch;
     });
@@ -51,9 +72,9 @@ export default function Catalogo() {
     const sortedBooks = [...filteredBooks].sort((a, b) => {
         switch (sortBy) {
             case "price_low":
-                return a.price - b.price;
+                return a.precio - b.precio;
             case "price_high":
-                return b.price - a.price;
+                return b.precio - a.precio;
             case "newest":
                 return b.id - a.id;
             default:
@@ -64,6 +85,19 @@ export default function Catalogo() {
     return (
         <main className="bg-gray-50 min-h-screen">
             <div className="max-w-7xl mx-auto px-6 py-8">
+                {/* Error Alert */}
+                {error && (
+                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-red-600">{error}</p>
+                        <button
+                            onClick={fetchBooks}
+                            className="mt-2 text-sm text-red-700 underline hover:text-red-900"
+                        >
+                            Intentar de nuevo
+                        </button>
+                    </div>
+                )}
+
                 <div className="flex gap-8">
                     {/* Sidebar de Filtros */}
                     <aside className="w-64 shrink-0">
