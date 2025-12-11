@@ -1,9 +1,103 @@
+import { useState, useEffect } from "react";
 import Header from "./Header";
 import CartIcon from "./CartIcon";
 import BookDetailsCart from "./BookDetailsCart";
+import BookCarousel from "./BookCarousel";
 import { CartProvider } from "../contexts/CartContext";
+import { getAllBooks } from "../utils/api";
 
-export default function BookDetailsPage({ book }) {
+export default function BookDetailsPage({ book: initialBook, id }) {
+    const [book, setBook] = useState(initialBook);
+    const [relatedBooks, setRelatedBooks] = useState([]);
+    const [loading, setLoading] = useState(!initialBook);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        if (!book && id) {
+            const fetchBook = async () => {
+                try {
+                    const response = await fetch(`http://localhost:8000/libros/${id}`);
+                    if (!response.ok) {
+                        throw new Error('Libro no encontrado');
+                    }
+                    const data = await response.json();
+
+                    // Mapear datos del backend (español) a la estructura del frontend (inglés)
+                    // Asumimos que data tiene: titulo, autor, precio, etc.
+                    // Y necesitamos mapear a: title, author, price, etc para que el renderizado funcione
+                    // O mejor aún, usamos los datos del backend directamente y ajustamos el renderizado abajo.
+                    // Para minimizar cambios invasivos, mapearé aquí.
+
+                    const mappedBook = {
+                        id: data.id,
+                        title: data.titulo,
+                        author: data.autor,
+                        price: data.precio,
+                        image: data.imagen_url || "https://placehold.co/400x600?text=Sin+Imagen", // Fallback image
+                        stock: data.cantidad_disponible,
+                        description: data.descripcion,
+                        categoria_id: data.categoria_id,
+                        // Datos dummy o faltantes en backend
+                        category: "General", // El backend tiene categoria_id, necesitaríamos hacer otro fetch o join. Por ahora hardcode o 'General'
+                        editorial: "Editorial Desconocida", // Faltante en backend model actual
+                        synopsis: data.descripcion, // Usamos descripción como sinopsis
+                        details: {
+                            isbn: "N/A",
+                            pages: "N/A",
+                            language: "Español", // Default
+                            format: "Físico",
+                            year: "2024"
+                        }
+                    };
+
+                    setBook(mappedBook);
+                } catch (err) {
+                    console.error("Error fetching book:", err);
+                    setError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchBook();
+        }
+    }, [id, book]);
+
+    // Fetch related books from same category
+    useEffect(() => {
+        if (book && book.categoria_id) {
+            const fetchRelatedBooks = async () => {
+                try {
+                    const books = await getAllBooks(book.categoria_id);
+                    // Filter out current book and limit to 8 books
+                    const filtered = books
+                        .filter(b => b.id !== book.id)
+                        .slice(0, 8);
+                    setRelatedBooks(filtered);
+                } catch (err) {
+                    console.error("Error fetching related books:", err);
+                }
+            };
+            fetchRelatedBooks();
+        }
+    }, [book]);
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen bg-gray-50">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
+            </div>
+        );
+    }
+
+    if (error || !book) {
+        return (
+            <div className="flex justify-center items-center h-screen bg-gray-50 flex-col">
+                <p className="text-xl text-red-600 font-semibold mb-4">Error: {error || "Libro no encontrado"}</p>
+                <a href="/" className="text-accent underline">Volver al inicio</a>
+            </div>
+        );
+    }
+
     return (
         <CartProvider>
             <Header />
@@ -14,16 +108,14 @@ export default function BookDetailsPage({ book }) {
                     <nav className="flex mb-6 text-sm text-gray-600">
                         <a href="/" className="hover:text-accent transition-colors">Inicio</a>
                         <span className="mx-2">/</span>
-                        <a href={`/?categoria=${encodeURIComponent(book.category)}`} className="hover:text-accent transition-colors">{book.category}</a>
-                        <span className="mx-2">/</span>
                         <span className="text-gray-900">{book.title}</span>
                     </nav>
 
                     {/* Contenido principal */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Imagen del libro */}
-                        <div className="lg:col-span-1">
-                            <div className="bg-white rounded-lg shadow-lg sticky top-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                        {/* Imagen del libro - Now takes 3 columns for extra large display */}
+                        <div className="lg:col-span-3">
+                            <div className="bg-white rounded-lg shadow-lg p-6 sticky top-8">
                                 <img
                                     src={book.image}
                                     alt={`Portada de ${book.title}`}
@@ -33,13 +125,13 @@ export default function BookDetailsPage({ book }) {
                             </div>
                         </div>
 
-                        {/* Información del libro */}
+                        {/* Información del libro - Now takes 2 columns */}
                         <div className="lg:col-span-2">
                             <div className="bg-white p-8">
                                 {/* Título y Autor */}
                                 <h1 className="text-4xl font-bold text-gray-900 mb-2">{book.title}</h1>
                                 <p className="text-xl text-gray-600 mb-4">por <span className="font-semibold">{book.author}</span></p>
-                                <p className="text-lg text-gray-600 mb-6">Editorial: <span className="font-medium">{book.editorial}</span></p>
+                                {/* <p className="text-lg text-gray-600 mb-6">Editorial: <span className="font-medium">{book.editorial}</span></p> */}
 
                                 <hr className="border-gray-200 mb-6" />
 
@@ -76,45 +168,22 @@ export default function BookDetailsPage({ book }) {
 
                                 {/* Sinopsis */}
                                 <div className="mb-8">
-                                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Sinopsis</h2>
+                                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Descripción</h2>
                                     <p className="text-gray-700 leading-relaxed text-justify">
-                                        {book.synopsis}
+                                        {book.description || book.synopsis}
                                     </p>
-                                </div>
-
-                                {/* Detalles técnicos */}
-                                <div>
-                                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Detalles del Producto</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="bg-gray-50 p-4 rounded-lg">
-                                            <p className="text-sm text-gray-600 mb-1">ISBN</p>
-                                            <p className="font-semibold text-gray-900">{book.details.isbn}</p>
-                                        </div>
-                                        <div className="bg-gray-50 p-4 rounded-lg">
-                                            <p className="text-sm text-gray-600 mb-1">Páginas</p>
-                                            <p className="font-semibold text-gray-900">{book.details.pages}</p>
-                                        </div>
-                                        <div className="bg-gray-50 p-4 rounded-lg">
-                                            <p className="text-sm text-gray-600 mb-1">Idioma</p>
-                                            <p className="font-semibold text-gray-900">{book.details.language}</p>
-                                        </div>
-                                        <div className="bg-gray-50 p-4 rounded-lg">
-                                            <p className="text-sm text-gray-600 mb-1">Formato</p>
-                                            <p className="font-semibold text-gray-900">{book.details.format}</p>
-                                        </div>
-                                        <div className="bg-gray-50 p-4 rounded-lg">
-                                            <p className="text-sm text-gray-600 mb-1">Año de publicación</p>
-                                            <p className="font-semibold text-gray-900">{book.details.year}</p>
-                                        </div>
-                                        <div className="bg-gray-50 p-4 rounded-lg">
-                                            <p className="text-sm text-gray-600 mb-1">Categoría</p>
-                                            <p className="font-semibold text-gray-900">{book.category}</p>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    {/* Related Books Carousel */}
+                    {relatedBooks.length > 0 && (
+                        <BookCarousel
+                            books={relatedBooks}
+                            title="Más libros de esta categoría"
+                        />
+                    )}
                 </div>
             </main>
         </CartProvider>

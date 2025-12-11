@@ -1,20 +1,16 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import { booksData } from "../../data/books";
 import { ClientRouter } from "astro:transitions";
 import BookDetailsPage from "../../components/BookDetailsPage";
 
-export function getStaticPaths() {
-    return booksData.map((book) => ({
-        params: { id: book.id.toString() },
-        props: { book },
-    }));
-}
+const { id } = Astro.params;
 
-const { book } = Astro.props;
+if (!id) {
+    return Astro.redirect("/");
+}
 ---
 
-<Layout title={`${book.title} - Mercado Libro`}>
+<Layout title={`Detalles del Libro - Mercado Libro`}>
     <ClientRouter />
-    <BookDetailsPage client:only="react" book={book} />
+    <BookDetailsPage client:only="react" id={id} book={null} />
 </Layout>

@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import BookCard from "./BookCard";
-import { getAllBooks } from "../utils/api";
-
-const categorias = ["Fantasía", "Ciencia ficción", "Misterio", "Novela Histórica", "Ficción"];
+import { getAllBooks, getAllCategories } from "../utils/api";
 
 const sortOptions = [
     { value: "relevance", label: "Relevancia" },
@@ -13,21 +11,45 @@ const sortOptions = [
 
 export default function Catalogo() {
     const [books, setBooks] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedCategoryId, setSelectedCategoryId] = useState(null);
     const [sortBy, setSortBy] = useState("relevance");
     const [searchQuery, setSearchQuery] = useState("");
+
+    // Cargar categorías al inicio
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const data = await getAllCategories();
+                setCategories(data);
+
+                // Verificar URL para establecer filtro inicial
+                const params = new URLSearchParams(window.location.search);
+                const categoryParam = params.get("categoria");
+                if (categoryParam) {
+                    const catId = parseInt(categoryParam);
+                    if (!isNaN(catId)) {
+                        setSelectedCategoryId(catId);
+                    }
+                }
+            } catch (err) {
+                console.error("Error cargando categorías:", err);
+            }
+        };
+        fetchCategories();
+    }, []);
 
     // Fetch books from API when category changes
     useEffect(() => {
         fetchBooks();
-    }, [selectedCategory]);
+    }, [selectedCategoryId]);
 
     const fetchBooks = async () => {
         try {
             setIsLoading(true);
-            const data = await getAllBooks(selectedCategory);
+            const data = await getAllBooks(selectedCategoryId);
             setBooks(data);
             setError("");
         } catch (err) {
@@ -37,21 +59,12 @@ export default function Catalogo() {
         }
     };
 
-    // Leer categoría de URL al cargar
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const categoryParam = params.get("categoria");
-        if (categoryParam && categorias.includes(categoryParam)) {
-            setSelectedCategory(categoryParam);
-        }
-    }, []);
-
     // Actualizar URL cuando cambia la categoría
-    const handleCategoryChange = (categoria) => {
-        setSelectedCategory(categoria);
+    const handleCategoryChange = (categoriaId) => {
+        setSelectedCategoryId(categoriaId);
         const url = new URL(window.location.href);
-        if (categoria) {
-            url.searchParams.set("categoria", categoria);
+        if (categoriaId) {
+            url.searchParams.set("categoria", categoriaId);
         } else {
             url.searchParams.delete("categoria");
         }
@@ -111,7 +124,7 @@ export default function Catalogo() {
                                         <input
                                             type="radio"
                                             name="categoria"
-                                            checked={selectedCategory === null}
+                                            checked={selectedCategoryId === null}
                                             onChange={() => handleCategoryChange(null)}
                                             className="peer sr-only"
                                         />
@@ -119,18 +132,18 @@ export default function Catalogo() {
                                             Todas
                                         </span>
                                     </label>
-                                    {categorias.map((categoria) => (
-                                        <label key={categoria} className="cursor-pointer">
+                                    {categories.map((categoria) => (
+                                        <label key={categoria.id} className="cursor-pointer">
                                             <input
                                                 type="radio"
                                                 name="categoria"
-                                                value={categoria}
-                                                checked={selectedCategory === categoria}
-                                                onChange={() => handleCategoryChange(categoria)}
+                                                value={categoria.id}
+                                                checked={selectedCategoryId === categoria.id}
+                                                onChange={() => handleCategoryChange(categoria.id)}
                                                 className="peer sr-only"
                                             />
                                             <span className="block px-4 py-2 rounded-md transition-colors peer-checked:bg-accent peer-checked:text-white hover:bg-gray-100">
-                                                {categoria}
+                                                {categoria.nombre}
                                             </span>
                                         </label>
                                     ))}

@@ -59,7 +59,7 @@ def seed_initial_categories():
                 direccion="Calle Falsa 123",
                 telefono="1234567890",
                 rfc="ADMINRFC1234",
-                es_admin=True # 👈 ¡Importante! Establecerlo como admin
+                es_admin=True
             )
             
             # 4. Guardar en la DB
